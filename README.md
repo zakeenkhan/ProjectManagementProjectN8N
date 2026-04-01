@@ -2,8 +2,7 @@
 
 ### Project Management Workflow
 
-[alt text](<project Management.JPG>)
-
+![alt text](<project Management.JPG>)
 ### Email Processing
 ![Email Module](Email.JPG)
 
