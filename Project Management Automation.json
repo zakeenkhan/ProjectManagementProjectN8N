@@ -1,0 +1,1368 @@
+{
+  "name": "Project Management Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "id": "b88feda8-fdf5-4a20-80a4-dcb669cb2010",
+      "name": "New Email Received",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        416
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1kt3I7gZnCBZqwPY",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "taskTitle",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "taskDescription",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "3",
+              "name": "emailFrom",
+              "value": "={{ $json.from }}",
+              "type": "string"
+            },
+            {
+              "id": "4",
+              "name": "emailDate",
+              "value": "={{ $json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "5",
+              "name": "emailId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "6",
+              "name": "status",
+              "value": "New",
+              "type": "string"
+            },
+            {
+              "id": "7",
+              "name": "createdAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "279bf73d-a30a-4f31-b106-fdbd72ed9c11",
+      "name": "Extract Task Details",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A7E2LJ7EZ",
+          "mode": "list",
+          "cachedResultName": "all-zakeen"
+        },
+        "text": "=🆕 *New Task Created*\n\n*Title:* {{ $json.taskTitle }}\n*From:* {{ $json.emailFrom }}\n*Description:* {{ $json.taskDescription }}\n*Status:* {{ $json.status }}\n*Created:* {{ $json.createdAt }}",
+        "otherOptions": {}
+      },
+      "id": "82150144-3654-4e7f-89c4-869b6d257083",
+      "name": "Notify Team on Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1024,
+        416
+      ],
+      "webhookId": "f85cd382-c3e0-41a3-bc17-3199cdb5362b",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "Ou6ZaUcdo1HnBZLg",
+          "name": "Slack OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 17
+            }
+          ]
+        }
+      },
+      "id": "c6d3f98e-ec60-46a5-a26c-08befc705e94",
+      "name": "Daily Progress Report",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        128,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a comprehensive daily project progress report based on the following tasks:\n\nTool to used. Google sheet\nfirst go to google sheet and fetch all the data \nthen \n\nInclude:\n1. Summary of completed tasks\n2. Tasks in progress with status\n3. Overdue tasks (if any)\n4. Team member workload\n5. Priority items requiring attention\n\nFormat the report professionally with clear sections and bullet points.",
+        "options": {
+          "systemMessage": "You are a project management assistant that creates clear, actionable progress reports.fetch and Analyze task data and provide insights on project status, team productivity, and areas needing attention."
+        }
+      },
+      "id": "05d6f2a8-f43f-4588-acf6-4c362ff788ae",
+      "name": "Generate Progress Report",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "zakeenkhann@gmail.com",
+        "subject": "=Daily Project Progress Report - {{ $now.toFormat(\"MMMM d, yyyy\") }}",
+        "message": "=<html><body style=\"font-family: Arial, sans-serif;\"><h2>Daily Project Progress Report</h2><pre style=\"background: #f5f5f5; padding: 15px; border-radius: 5px; white-space: pre-wrap;\">{{ $json.output }}</pre><hr><p style=\"color: #666; font-size: 12px;\">This report was generated automatically by n8n workflow automation.</p></body></html>",
+        "options": {}
+      },
+      "id": "c266d908-daa3-4310-be02-c89f9c99e323",
+      "name": "Send Report via Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        704
+      ],
+      "webhookId": "6faa97ad-eab3-4091-a6e8-d1b10f6a8b63",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1kt3I7gZnCBZqwPY",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "95265510-2ba6-43e1-a33d-ffd8313000df",
+      "name": "Check Deadlines Daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "taskTitle",
+              "value": "={{ $json.taskTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "assignedTo",
+              "value": "={{ $json.assignedTo }}",
+              "type": "string"
+            },
+            {
+              "id": "3",
+              "name": "deadline",
+              "value": "={{ $json.deadline }}",
+              "type": "string"
+            },
+            {
+              "id": "4",
+              "name": "priority",
+              "value": "={{ $json.priority }}",
+              "type": "string"
+            },
+            {
+              "id": "5",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "6",
+              "name": "daysUntilDeadline",
+              "value": "={{ Math.ceil((new Date($json.deadline) - $now) / (1000 * 60 * 60 * 24)) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "0e5c0042-bc22-4f8f-9321-470376d79c29",
+      "name": "Calculate Days Until Deadline",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.daysUntilDeadline }}",
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              },
+              "rightValue": 3,
+              "id": "0bc51e50-e61e-4874-b82b-93b9dda7fa16"
+            },
+            {
+              "leftValue": "={{ $json.status }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              },
+              "rightValue": "Completed",
+              "id": "af4ba8be-84b3-4721-93bc-556eaa51cf7c"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7c75b783-6dd7-4ad2-9e9b-f1d4eade7486",
+      "name": "Is Deadline Within 3 Days?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        832,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A7E2LJ7EZ",
+          "mode": "list",
+          "cachedResultName": "all-zakeen"
+        },
+        "text": "=⚠️ *URGENT DEADLINE ALERT*\n\n*Task:* {{ $json.taskTitle }}\n*Assigned to:* {{ $json.assignedTo }}\n*Deadline:* {{ $json.deadline }}\n*Days remaining:* {{ $json.daysUntilDeadline }}\n*Priority:* {{ $json.priority }}\n*Status:* {{ $json.status }}\n\n🔔 Please prioritize this task!",
+        "otherOptions": {}
+      },
+      "id": "3c3f6cde-44a6-4a20-a92e-9a9d0a043d13",
+      "name": "Send Urgent Deadline Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1056,
+        1088
+      ],
+      "webhookId": "34ffb45a-5014-491c-94a8-1b371248280d",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "Ou6ZaUcdo1HnBZLg",
+          "name": "Slack OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=zakeenkhann@gmail.com",
+        "subject": "=Reminder: {{ $json.taskTitle }} - Due {{ $json.deadline }}",
+        "emailType": "text",
+        "message": "=Hi {{ $json.assignedTo }},\n\nThis is a friendly reminder about your upcoming task:\n\nTask: {{ $json.taskTitle }}\nDeadline: {{ $json.deadline }}\nDays remaining: {{ $json.daysUntilDeadline }}\nPriority: {{ $json.priority }}\nCurrent status: {{ $json.status }}\n\nPlease ensure this task is completed on time.\n\nBest regards,\nProject Management System",
+        "options": {}
+      },
+      "id": "ef2bb633-f2a9-4964-a8f4-47604d47a6eb",
+      "name": "Send Regular Reminder Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1056,
+        1264
+      ],
+      "webhookId": "fcc35e21-fd80-4b21-b612-ffc24b984209",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1kt3I7gZnCBZqwPY",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A",
+          "mode": "list",
+          "cachedResultName": "SPM ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "taskTitle": "={{ $json.taskTitle }}",
+            "taskDescription": "={{ $json.taskDescription }}",
+            "emailFrom": "={{ $json.emailFrom }}",
+            "emailDate": "={{ $json.emailDate }}",
+            "emailId": "={{ $json.emailId }}",
+            "status": "={{ $json.status }}",
+            "createdAt": "={{ $json.createdAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "taskTitle",
+              "displayName": "taskTitle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "taskDescription",
+              "displayName": "taskDescription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailFrom",
+              "displayName": "emailFrom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailDate",
+              "displayName": "emailDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailId",
+              "displayName": "emailId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "createdAt",
+              "displayName": "createdAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        416
+      ],
+      "id": "87e727ac-92ea-403c-90df-bbf0cacafd72",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UBkHeGNzPwSBiKL6",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        464,
+        896
+      ],
+      "id": "7ade8693-5308-48ee-9d35-2551f792263a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "x3aq8mmQHRVg1KZD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A",
+          "mode": "list",
+          "cachedResultName": "SPM ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        608,
+        896
+      ],
+      "id": "8123973f-89b3-49ab-b54f-09de1e6540b3",
+      "name": "Fetch data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UBkHeGNzPwSBiKL6",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A",
+          "mode": "list",
+          "cachedResultName": "SPM ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 894256809,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit#gid=894256809"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        352,
+        1168
+      ],
+      "id": "559a6190-839b-43ea-8299-77a94719ab48",
+      "name": "Task data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UBkHeGNzPwSBiKL6",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "d1dd92cf-0739-451e-a8eb-a99e29fad1d9",
+      "name": "Check Deadlines Daily1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A",
+          "mode": "list",
+          "cachedResultName": "SPM ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1451324720,
+          "mode": "list",
+          "cachedResultName": "Sheet3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit#gid=1451324720"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        400,
+        48
+      ],
+      "id": "052e05d5-5cbc-418a-b17a-20e8159849cd",
+      "name": "Task data1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UBkHeGNzPwSBiKL6",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A7E2LJ7EZ",
+          "mode": "list",
+          "cachedResultName": "all-zakeen"
+        },
+        "text": "=** Updated Project Status ** \n\n{{ $json.output }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1056,
+        48
+      ],
+      "id": "a092b750-884e-41d1-8841-b7141b6f03bc",
+      "name": "Send a message",
+      "webhookId": "38a6b4d8-1aab-4169-9d59-b62d7118b71d",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "Ou6ZaUcdo1HnBZLg",
+          "name": "Slack OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Task_ID }}\n{{ $json.Task_Name }}\n{{ $json.Owner }}\n{{ $json.Status }}\n{{ $json.Due_Date }}\n{{ $json.Priority }}\n{{ $json.Notes }}\n",
+        "options": {
+          "systemMessage": "You are a Project Management Assistant responsible for synthesizing daily progress reports. Your goal is to transform raw task data into a clear, executive-style daily status update.\nINPUT DATA\nYou will receive a list of tasks in JSON format from a Google Sheets integration. Each task includes: taskTitle, assignedTo, deadline, priority, and status.\nREPORT STRUCTURE\nGenerate the update using only these three sections in plain text (no markdown):\nCOMPLETED TODAY: List all tasks where the status is \"Done\".\nIN PROGRESS: List tasks currently being worked on. Explicitly flag any task as \"OVERDUE\" if the deadline is before today's date.\nNEEDS ATTENTION: List all tasks that are \"Blocked\", \"Not Started\" but past their deadline, or have a \"Critical\" priority.\nGUIDELINES\nKeep descriptions concise.\nUse a professional, direct tone.\nDo not use bolding, tables, or special formatting.\nIf a section has no tasks, write \"None\""
+        }
+      },
+      "id": "149e922f-4a3c-4b91-acc1-25baf2620b89",
+      "name": "Updated Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        688,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        688,
+        256
+      ],
+      "id": "5793bb7b-12aa-4939-8a81-f0be29d50053",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "x3aq8mmQHRVg1KZD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A",
+          "mode": "list",
+          "cachedResultName": "SPM ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1078343466,
+          "mode": "list",
+          "cachedResultName": "TeamMembers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit#gid=1078343466"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        1504
+      ],
+      "id": "877d783c-9d23-4a8d-b7fd-c07bd6cd20b4",
+      "name": "Assign members",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UBkHeGNzPwSBiKL6",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A",
+          "mode": "list",
+          "cachedResultName": "SPM ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1520555478,
+          "mode": "list",
+          "cachedResultName": "AssignTo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit#gid=1520555478"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        64,
+        1504
+      ],
+      "id": "8b09ef7a-d097-47fe-a6af-633f7e87e0ed",
+      "name": "Assign Employees",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "RZEnddApW05q8ES2",
+          "name": "Google Sheets Trigger OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "moonshotai/kimi-k2-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        480,
+        1728
+      ],
+      "id": "78b4213f-3b58-42f8-804b-0a0877f08cce",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Eoc7fahjb8HpqSz2",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A",
+          "mode": "list",
+          "cachedResultName": "SPM ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1520555478,
+          "mode": "list",
+          "cachedResultName": "AssignTo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit#gid=1520555478"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Assigned_To": "={{ $('Assign members').item.json.Name }}"
+          },
+          "matchingColumns": [
+            "Assigned_To"
+          ],
+          "schema": [
+            {
+              "id": "Task_ID",
+              "displayName": "Task_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Task_Name",
+              "displayName": "Task_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Required_Skill",
+              "displayName": "Required_Skill",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Due_Date",
+              "displayName": "Due_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned_To",
+              "displayName": "Assigned_To",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        1504
+      ],
+      "id": "7bfe130f-e011-44ff-bbea-96ad573de1a0",
+      "name": "update and assign Employee",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UBkHeGNzPwSBiKL6",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A7E2LJ7EZ",
+          "mode": "list",
+          "cachedResultName": "all-zakeen"
+        },
+        "text": "={{ $('Assign Task Employee Agent').item.json.output }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1040,
+        1504
+      ],
+      "id": "16abf3db-3a71-42e8-baef-782e0570ffa6",
+      "name": "Notify Employee",
+      "webhookId": "041fd91e-c15c-47f3-8a19-07dd120216b2",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "Ou6ZaUcdo1HnBZLg",
+          "name": "Slack OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Role: You are a Project Management Assistant. Your goal is to assign the \"NEW TASK\" to the most qualified person from the \"TEAM ROSTER\" based on specific logic. \nNEW TASK:\nName: {{ $('Assign Employees').item.json.Task_Name }}\nRequired Skill: {{ $('Assign Employees').item.json.Required_Skill }}\nDue Date: {{ $('Assign Employees').item.json.Due_Date }}\nPriority: {{ $('Assign Employees').item.json.Priority }}\n\nTEAM ROSTER:\n{{ $json.row_number }}\n{{ $json.Name }} \n{{ $json.Skills }}\n{{ $json.Open_Tasks }}\n{{ $json.Availability }}\n{{ $json.Slack_ID }}\n\nSelection Rules:\nSkill Match: The member’s skills must match the task's Required Skill.\nWorkload: Among qualified members, prioritize the person with the fewest Open_Tasks.\nAvailability: Only assign to someone marked as \"Busy\" if no \"Available\" members meet the skill requirement.\n\nOutput Format:\n\nRespond in EXACTLY this format with no introductory or concluding text:\n\nASSIGNEE: {{ $json.Name }}\nSLACK_ID: {{ $json.Slack_ID }}\nREASON: One sentence explaining why they were chosen based on skills and workload({{ $('Assign Employees').item.json.Notes }})\n\nMESSAGE: Hi {{ $json.Name }}, you've been assigned a new task:{{ $('Assign Employees').item.json.Task_Name }}  due on {{ $('Assign Employees').item.json.Due_Date }}, Priority: {{ $('Assign Employees').item.json.Priority }}. Please confirm receipt.\n\nThank you",
+        "options": {
+          "systemMessage": "="
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        480,
+        1504
+      ],
+      "id": "349e11fd-a89a-4e8c-a297-8d6bc612674f",
+      "name": "Assign Task Employee Agent"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A",
+          "mode": "list",
+          "cachedResultName": "SPM ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SevGF9LzkIXZ5WKQWNyMLxGYi2TMeWTJF_Cnq_2W7_A/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        320,
+        1920
+      ],
+      "id": "70f41377-b898-4bea-9bd0-4e597a1de622",
+      "name": "project Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UBkHeGNzPwSBiKL6",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        576,
+        1920
+      ],
+      "id": "dd612bc9-bc3b-4744-a095-4b5e0fde93e4",
+      "name": "project Aggregate"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        784,
+        1920
+      ],
+      "id": "0a35e060-182d-443e-bb00-2c05450d0b92",
+      "name": "Progressing Report AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        784,
+        2128
+      ],
+      "id": "379f261d-b6aa-4fe3-8a81-acb173896eea",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "x3aq8mmQHRVg1KZD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "zakeenkhann@gmail.com",
+        "subject": "=Report project",
+        "message": "Done",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        1920
+      ],
+      "id": "e6f36230-7db0-4f2e-834f-3686905d3e13",
+      "name": "Send message stackholders",
+      "webhookId": "c1dc3909-da69-4179-b8ca-6a65bc7153fc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1kt3I7gZnCBZqwPY",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "0528094c-2083-4deb-a890-3e82de837a57",
+      "name": "Run every week",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        1920
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Email Received": {
+      "main": [
+        [
+          {
+            "node": "Extract Task Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Task Details": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Progress Report": {
+      "main": [
+        [
+          {
+            "node": "Generate Progress Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Progress Report": {
+      "main": [
+        [
+          {
+            "node": "Send Report via Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Deadlines Daily": {
+      "main": [
+        [
+          {
+            "node": "Task data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Days Until Deadline": {
+      "main": [
+        [
+          {
+            "node": "Is Deadline Within 3 Days?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Deadline Within 3 Days?": {
+      "main": [
+        [
+          {
+            "node": "Send Urgent Deadline Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Regular Reminder Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Notify Team on Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Progress Report",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch data": {
+      "ai_tool": [
+        [
+          {
+            "node": "Generate Progress Report",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Task data": {
+      "main": [
+        [
+          {
+            "node": "Calculate Days Until Deadline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Deadlines Daily1": {
+      "main": [
+        [
+          {
+            "node": "Task data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Task data1": {
+      "main": [
+        [
+          {
+            "node": "Updated Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Updated Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Updated Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assign Employees": {
+      "main": [
+        [
+          {
+            "node": "Assign members",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assign members": {
+      "main": [
+        [
+          {
+            "node": "Assign Task Employee Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Assign Task Employee Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update and assign Employee": {
+      "main": [
+        [
+          {
+            "node": "Notify Employee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assign Task Employee Agent": {
+      "main": [
+        [
+          {
+            "node": "update and assign Employee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "project Data": {
+      "main": [
+        [
+          {
+            "node": "project Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "project Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Progressing Report AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Progressing Report AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message stackholders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Progressing Report AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run every week": {
+      "main": [
+        [
+          {
+            "node": "project Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "022f60fb-30dd-4106-ba1e-bf1296d40b2c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b629830bc772f117b1acaaef9aa92465584eb95cb37aed0d32450ad62fc250f0"
+  },
+  "id": "yYVPL1LBaSpEoT0I",
+  "tags": []
+}
